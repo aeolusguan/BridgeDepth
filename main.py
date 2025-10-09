@@ -17,6 +17,8 @@ from bridgedepth.utils.logger import setup_logger
 from bridgedepth.utils.launch import launch
 from bridgedepth.utils.eval_disp import eval_disp
 
+from bridgedepth.config import CfgNode
+
 
 def get_args_parser():
     parser = argparse.ArgumentParser(
@@ -210,6 +212,7 @@ def main(args):
     no_resume_optimizer = cfg.SOLVER.NO_RESUME_OPTIMIZER
     if resume:
         logger.info('Load checkpoint: %s' % resume)
+        torch.serialization.add_safe_globals([CfgNode])
 
         checkpoint = torch.load(resume, map_location='cpu')
 
