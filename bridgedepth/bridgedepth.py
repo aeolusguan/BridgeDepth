@@ -114,7 +114,7 @@ class BridgeDepth(nn.Module):
             self.padder = None
         H, W = img1.shape[-2:]
         mono_size = (H // 8 * 7, W // 8 * 7)
-        mono_input = F.interpolate(img1, size=mono_size, mode="bilinear", align_corners=False)
+        mono_input = F.interpolate(img1, size=mono_size, mode="bilinear", align_corners=False, antialias=True)
 
         inputs["img1"] = img1
         inputs["img2"] = img2
@@ -126,14 +126,19 @@ class BridgeDepth(nn.Module):
         if self.training:
             mono_prediction = F.relu(self.mono_output(mono_embeds))
             out['mono_prediction'] = rearrange(mono_prediction, 'n b h w (hs ws) -> n b (h hs) (w ws)', hs=8)
+        else:
+            mono_prediction = F.relu(self.mono_output(mono_embeds[-1]))
+            out['disp_mono'] = rearrange(mono_prediction, 'b h w (hs ws) -> b (h hs) (w ws)', hs=8)
         
         if self.padder is None:
             return out
         
         if out["disp_pred"].dim() != 4:
             out["disp_pred"] = self.padder.unpad(out["disp_pred"].unsqueeze(1)).squeeze(1)
+            out['disp_mono'] = self.padder.unpad(out["disp_mono"].unsqueeze(1)).squeeze(1)
         else:
             out["disp_pred"] = self.padder.unpad(out["disp_pred"])
+            out['disp_mono'] = self.padder.unpad(out["disp_mono"])
         return out
     
     def forward(self, inputs):

@@ -303,6 +303,7 @@ class Alignment(nn.Module):
         ])
 
         self.norm = norm_layer(embed_dim)
+        self.norm_mono = norm_layer(embed_dim)
 
     def compute_attn_mask(self, H, W, N, device):
         attn_mask = []
@@ -345,12 +346,12 @@ class Alignment(nn.Module):
             stereo_embed, mono_embed = layer(stereo_embed, mono_embed, stereo_pos_embed, attn_mask[idx%2])
             if return_intermediate:
                 stereo_embeds.append(self.norm(stereo_embed))
-                mono_embeds.append(mono_embed.squeeze(-2))
+                mono_embeds.append(self.norm_mono(mono_embed).squeeze(-2))
 
         if return_intermediate:
             return torch.stack(stereo_embeds, 0), torch.stack(mono_embeds, 0)
         
-        return self.norm(stereo_embed)[None], mono_embed[None].squeeze(-2)
+        return self.norm(stereo_embed)[None], self.norm_mono(mono_embed)[None].squeeze(-2)
 
 
 def gen_shift_window_attn_mask(input_resolution, window_size, shift_size, device=torch.device('cuda')):

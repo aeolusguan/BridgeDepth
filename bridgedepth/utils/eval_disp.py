@@ -11,11 +11,13 @@ import numpy as np
 import torch
 from torch import nn
 import einops
+import utils3d
 
 from .logger import log_every_n_seconds
 from . import dist_utils as comm
 from . import frame_utils
 from ..dataloader import build_val_loader
+from ..utils.alignment import align_depth_affine, mask_aware_nearest_resize, align_affine_lstsq
 
 
 def print_csv_format(results):
@@ -300,6 +302,7 @@ class DispEvaluator(DatasetEvaluator):
         outputs = [dict(zip(outputs, t)) for t in zip(*outputs.values())]
         for input, output in zip(inputs, outputs):
             disp_pr = output['disp_pred']
+            disp_mono_pr = output['disp_mono']
             disp_gt = input['disp'].to(disp_pr.device)
             valid_gt = input['valid'].to(disp_pr.device)
             if self._only_valid:
@@ -307,6 +310,15 @@ class DispEvaluator(DatasetEvaluator):
             else:
                 valid = disp_gt < self._max_disp
             assert disp_pr.shape == disp_gt.shape, (disp_pr.shape, disp_gt.shape)
+
+            if not torch.any(valid).item():
+                continue
+
+            # align
+            _, lr_mask, lr_index = mask_aware_nearest_resize(None, valid, (64, 64), return_index=True)
+            disp_mono_lr_masked, disp_gt_lr_masked = disp_mono_pr[lr_index][lr_mask], disp_gt[lr_index][lr_mask]
+            scale, shift = align_depth_affine(disp_mono_lr_masked, disp_gt_lr_masked, torch.ones_like(disp_mono_lr_masked))
+            disp_pr = torch.nn.functional.relu(scale * disp_mono_pr + shift)
 
             epe = torch.abs(disp_pr - disp_gt)
             epe = epe.flatten()
