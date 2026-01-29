@@ -76,9 +76,12 @@ if __name__ == "__main__":
     H, W = img1.shape[:2]
     
     W_MAX = 1024
-    scale = W_MAX / W
-    img1 = cv2.resize(img1, fx=scale, fy=scale, dsize=None, interpolation=cv2.INTER_LINEAR)
-    img2 = cv2.resize(img2, fx=scale, fy=scale, dsize=None, interpolation=cv2.INTER_LINEAR)
+    if W > W_MAX:
+        scale = W_MAX / W
+        img1 = cv2.resize(img1, fx=scale, fy=scale, dsize=None, interpolation=cv2.INTER_LINEAR)
+        img2 = cv2.resize(img2, fx=scale, fy=scale, dsize=None, interpolation=cv2.INTER_LINEAR)
+    else:
+        scale = 1.0
     H, W = img1.shape[:2]
     logger.info(f"img1: {img1.shape}")
 
