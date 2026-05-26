@@ -143,7 +143,7 @@ and then access [http://localhost:6006](http://localhost:6066) in your browser.
 
 ## BibTex
 ```bibtex
-@article{guan2025bridgedepth,
+@inproceedings{guan2025bridgedepth,
     author    = {Guan, Tongfan and Guo, Jiaxin and Wang, Chen and Liu, Yun-Hui},
     title     = {BridgeDepth: Bridging Monocular and Stereo Reasoning with Latent Alignment},
     booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
