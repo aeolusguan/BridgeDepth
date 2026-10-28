@@ -1,5 +1,7 @@
 KITTI image-model training and validation split lists are bundled in `splits/` beside this loader. The loader resolves them relative to its own module, independently of the current working directory. Streaming datasets use `bridgedepth/datasets/` and do not use these lists.
 
+The retained image-model splits are `kitti_2012_trainval` (194 pairs), `kitti_2015_trainval` (200 pairs), `kitti_mix` (394 pairs), and `kitti_2015_val` (40 pairs). The KITTI fine-tuning config retains evaluation on the 40-pair validation split.
+
 # Datasets
 The project requires the following datasets:
 

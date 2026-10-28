@@ -273,14 +273,9 @@ class KITTI(StereoDataset):
 
         else:
             kitti_dict = {
-                'kitti_mix_2012_train': 'KITTI_mix_2012_train.txt',
-                'kitti_mix_2015_train': 'KITTI_mix_2015_train.txt',
-                'kitti_2012_val': 'KITTI_2012_val.txt',
                 'kitti_2015_val': 'KITTI_2015_val.txt',
                 'kitti_mix': 'KITTI_mix.txt',
-                'kitti_2015_train': 'KITTI_2015_train.txt',
                 'kitti_2015_trainval': 'KITTI_2015_trainval.txt',
-                'kitti_2012_train': 'KITTI_2012_train.txt',
                 'kitti_2012_trainval': 'KITTI_2012_trainval.txt',
             }
 
