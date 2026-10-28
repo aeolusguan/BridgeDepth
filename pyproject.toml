@@ -26,7 +26,7 @@ include = ["bridgedepth*"]
 "bridgedepth.models._filt3r.croco" = ["LICENSE*", "NOTICE*"]
 "bridgedepth.models._filt3r.croco.curope" = ["*.cpp", "*.cu", "*.h"]
 "bridgedepth.monocular" = ["LICENSE*"]
-"bridgedepth.dataloader" = ["*.md"]
+"bridgedepth.dataloader" = ["*.md", "splits/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

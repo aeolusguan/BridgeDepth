@@ -273,19 +273,19 @@ class KITTI(StereoDataset):
 
         else:
             kitti_dict = {
-                'kitti_mix_2012_train': 'filenames/KITTI_mix_2012_train.txt',
-                'kitti_mix_2015_train': 'filenames/KITTI_mix_2015_train.txt',
-                'kitti_2012_val': 'filenames/KITTI_2012_val.txt',
-                'kitti_2015_val': 'filenames/KITTI_2015_val.txt',
-                'kitti_mix': 'filenames/KITTI_mix.txt',
-                'kitti_2015_train': 'filenames/KITTI_2015_train.txt',
-                'kitti_2015_trainval': 'filenames/KITTI_2015_trainval.txt',
-                'kitti_2012_train': 'filenames/KITTI_2012_train.txt',
-                'kitti_2012_trainval': 'filenames/KITTI_2012_trainval.txt',
+                'kitti_mix_2012_train': 'KITTI_mix_2012_train.txt',
+                'kitti_mix_2015_train': 'KITTI_mix_2015_train.txt',
+                'kitti_2012_val': 'KITTI_2012_val.txt',
+                'kitti_2015_val': 'KITTI_2015_val.txt',
+                'kitti_mix': 'KITTI_mix.txt',
+                'kitti_2015_train': 'KITTI_2015_train.txt',
+                'kitti_2015_trainval': 'KITTI_2015_trainval.txt',
+                'kitti_2012_train': 'KITTI_2012_train.txt',
+                'kitti_2012_trainval': 'KITTI_2012_trainval.txt',
             }
 
             assert image_set in kitti_dict.keys()
-            data_filename = kitti_dict[image_set]
+            data_filename = Path(__file__).parent / 'splits' / kitti_dict[image_set]
 
             self._root_12 = os.path.join(root, 'KITTI_2012')
             self._root_15 = os.path.join(root, 'KITTI_2015')

@@ -1,3 +1,5 @@
+KITTI image-model training and validation split lists are bundled in `splits/` beside this loader. The loader resolves them relative to its own module, independently of the current working directory. Streaming datasets use `bridgedepth/datasets/` and do not use these lists.
+
 # Datasets
 The project requires the following datasets:
 
