@@ -2,8 +2,6 @@ from functools import partial
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchvision.models import SwinTransformer, ConvNeXt
-from torchvision.models.convnext import CNBlockConfig
 
 from .submodule import FeatureFusionBlock, _make_scratch, init_weights
 
@@ -52,8 +50,9 @@ class ResidualBlock(nn.Module):
     
 
 class Backbone(nn.Module):
-    def __init__(self, output_dim=128, norm_layer=nn.InstanceNorm2d):
+    def __init__(self, output_dim=128, norm_layer=nn.InstanceNorm2d, normalize_input=True):
         super(Backbone, self).__init__()
+        self.normalize_input = normalize_input
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False) # 1/2
         self.norm1 = norm_layer(64)
@@ -80,7 +79,8 @@ class Backbone(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        x = 2 * (x / 255.0) - 1.0
+        if self.normalize_input:
+            x = 2 * (x / 255.0) - 1.0
 
         x = self.conv1(x)
         x = self.norm1(x)
@@ -105,6 +105,8 @@ class SwinDPT(nn.Module):
         _init_weights=True
     ):
         super().__init__()
+
+        from torchvision.models import SwinTransformer
 
         model = SwinTransformer(
             patch_size=[4, 4],
@@ -192,6 +194,9 @@ class ConvNextDPT(nn.Module):
         _init_weights=True
     ):
         super().__init__()
+
+        from torchvision.models import ConvNeXt
+        from torchvision.models.convnext import CNBlockConfig
 
         model = ConvNeXt(
             block_setting=[

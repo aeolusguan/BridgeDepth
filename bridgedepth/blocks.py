@@ -65,9 +65,9 @@ class CrossAttention(nn.Module):
         coords_h_key = torch.arange(self.window_size[0] * stride) + 0.5
         coords_w_query = (torch.arange(self.window_size[1]) + 0.5) * stride
         coords_w_key = torch.arange(self.window_size[1] * stride) + 0.5
-        coords_query = torch.stack(torch.meshgrid([coords_h_query, coords_w_query]))  # 2, Wh, Ww
+        coords_query = torch.stack(torch.meshgrid([coords_h_query, coords_w_query], indexing="ij"))  # 2, Wh, Ww
         coords_query_flatten = torch.flatten(coords_query, 1)  # 2, Wh*Ww
-        coords_key = torch.stack(torch.meshgrid([coords_h_key, coords_w_key]))  # 2, Wh*stride, Ww*stride
+        coords_key = torch.stack(torch.meshgrid([coords_h_key, coords_w_key], indexing="ij"))  # 2, Wh*stride, Ww*stride
         coords_key_flatten = torch.flatten(coords_key, 1)  # 2, Wh*Ww*stride*stride
         relative_coords = coords_query_flatten[:, :, None] - coords_key_flatten[:, None, :]  # 2, Wh*Ww, Wh*Ww*stride*stride
         relative_coords = relative_coords.permute(1, 2, 0).contiguous()  # Wh*Ww, Wh*Ww*stride*stride, 2
@@ -128,8 +128,9 @@ class CrossAttention(nn.Module):
         Wp = W + pad_r
         if pad_r > 0 or pad_b > 0:
             q = F.pad(q, (0, 0, 0, 0, pad_l, pad_r, pad_t, pad_b))
-            k = F.pad(k, (0, 0, 0, 0, pad_l, pad_r, pad_t, pad_b))
-            v = F.pad(v, (0, 0, 0, 0, pad_l, pad_r, pad_t, pad_b))
+            context_pad = (0, 0, 0, 0, 0, int(pad_r * self.stride), 0, int(pad_b * self.stride))
+            k = F.pad(k, context_pad)
+            v = F.pad(v, context_pad)
 
         q = self.window_partition(q, query=True)
         k = self.window_partition(k)

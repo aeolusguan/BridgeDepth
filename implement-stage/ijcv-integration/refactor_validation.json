@@ -1,0 +1,39 @@
+{
+  "streaming": {
+    "strict_checkpoint_keys": 1687,
+    "evaluation_frames": 3,
+    "training_frame": true,
+    "tensor_comparisons": 89,
+    "maximum_absolute_difference": 0.0
+  },
+  "image": {
+    "strict_checkpoint_keys": 556,
+    "tensor_comparisons": 14,
+    "maximum_absolute_difference": 0.0
+  },
+  "unchanged": {
+    "frozen_wrapper": true,
+    "native_inference_files": 28,
+    "historical_records": true
+  },
+  "suite": {
+    "passed": 59,
+    "warnings": 12,
+    "scope": "CPU random-model refactor checks; no pretrained accuracy or CUDA claim",
+    "seconds": 21.06
+  },
+  "wheel": {
+    "name": "bridgedepth",
+    "version": "0.1.0",
+    "required_modules_licenses_and_cuda_source": true,
+    "entries": 86,
+    "all_python_sources_match": true,
+    "isolated_imports": true
+  },
+  "review": {
+    "verdict": "clean",
+    "undeclared": 0,
+    "stale_rows": 0,
+    "acceptance": "provisional; actual model identity unknown"
+  }
+}

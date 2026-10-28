@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bridgedepth"
+version = "0.1.0"
+description = "Bridging Monocular and Stereo Reasoning with Spatiotemporal Latent Alignment"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.3", "numpy>=1.24", "Pillow>=9", "einops>=0.7",
+    "yacs>=0.1.8", "PyYAML>=6", "omegaconf>=2.3",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+filt3r = ["transformers>=4.49,<5"]
+image = ["torchvision", "huggingface-hub>=0.33", "imageio>=2.37", "opencv-python>=4.11"]
+
+[tool.setuptools.packages.find]
+include = ["bridgedepth*"]
+
+[tool.setuptools.package-data]
+"bridgedepth.models._filt3r" = ["LICENSE*", "NOTICE*", "*.md"]
+"bridgedepth.models._filt3r.croco" = ["LICENSE*", "NOTICE*"]
+"bridgedepth.models._filt3r.croco.curope" = ["*.cpp", "*.cu", "*.h"]
+"bridgedepth.monocular" = ["LICENSE*"]
+"bridgedepth.dataloader" = ["*.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -39,7 +39,7 @@ class NMRF(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(128, 256, 1, 1, 0, bias=False))
 
-        self.ffn = Mlp(infer_embed_dim+32, infer_embed_dim, infer_embed_dim)
+        self.ffn = Mlp(2 * 64 + 32, infer_embed_dim, infer_embed_dim)
         
         # init weights
         self.apply(self._init_weights)

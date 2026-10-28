@@ -1,0 +1,17 @@
+{
+  "skill": "research-implement-feature",
+  "route": "codex-native",
+  "route_source": "host default; no invocation override or project reviewer configuration",
+  "route_helper": "unavailable after canonical lookup",
+  "requested_model": "gpt-6-astra",
+  "requested_effort": "xhigh",
+  "actual_model": null,
+  "actual_model_source": "reviewer reported unknown",
+  "agent": "/root/audit_shared_repo_integration",
+  "completion": "completed",
+  "review_independence": "not established",
+  "acceptance_status": "provisional",
+  "initial_finding": "Audit found `bridgedepth/datasets/` is present but wholly Git-ignored by the inherited unanchored `datasets/` rule: `git status --short --ignored bridgedepth/datasets` returns `!! bridgedepth/datasets/`, and none of its five Python files appear in `git ls-files --others --exclude-standard`. This affects preserving/shipping the documented streaming dataset API from Git.",
+  "resolved_in_review": "Anchored rule to /datasets/, declared I-011 and added a real Git ignore regression check. Reviewer verified all five dataset sources are visible to Git.",
+  "final_reply": "{\"undeclared\":[],\"stale_rows\":[],\"semantic_undeclared\":0,\"verdict\":\"clean\",\"actual_model_identity\":\"unknown\",\"acceptance\":\"provisional; model-family independence not established\"}"
+}

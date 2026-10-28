@@ -5,15 +5,16 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
 # C extensions
 *.so
-
 # dataset and checkpoint directory
 checkpoints/
-datasets/
-
+/datasets/
 # distribution / packaging
 build/
 dist/
 *.egg-info/
+.pytest_cache/
+.venv/
+data/
+third_party/

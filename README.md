@@ -1,11 +1,30 @@
-# BridgeDepth
+# BridgeDepth: Bridging Monocular and Stereo Reasoning with Spatiotemporal Latent Alignment
 
-Official implementation of paper:
+This repository contains the ICCV 2025 image model and an in-development streaming extension for calibrated, causal stereo video. The streaming extension is being developed for a journal submission.
+
+| Model | Public API | Guide |
+|---|---|---|
+| Image stereo (ICCV 2025) | `bridgedepth.bridgedepth.BridgeDepth` | Image instructions below |
+| Causal streaming stereo (in development) | `bridgedepth.models.StreamingBridgeDepth` | [Streaming guide](docs/streaming.md) |
+
+The image model retains its original API, configurations and checkpoints. The streaming model combines frozen FILT3R with six coarse and six fine alignment stages and shares the stereo/alignment implementation with the image model. Task losses and a complete video training runner remain in development.
+
+For an editable installation of image inference, streaming components and tests:
+
+```bash
+python -m pip install -e '.[image,filt3r,test]'
+```
+
+The original full image-training/demo environment is documented below. FILT3R inference source is bundled; no external FILT3R checkout is required. Third-party sources retain their own licenses and notices; see [source provenance](docs/source_provenance.md).
+
+## Image stereo: ICCV 2025
+
+Original conference paper:
 
 [**BridgeDepth: Bridging Monocular and Stereo Reasoning with Latent Alignment**](https://www.arxiv.org/abs/2508.04611), **ICCV 2025**<br/>
 Tongfan Guan, Jiaxin Guo, Chen Wang, Yun-Hui Liu<br/>
 
-# Abstract
+## Image-model abstract
 Monocular and stereo depth estimation offer complementary strengths: monocular methods capture rich contextual priors but lack geometric precision, while stereo approaches leverage epipolar geometry yet struggle with ambiguities such as reflective or textureless surfaces. Despite post-hoc synergies, these paradigms remain largely disjoint in practice. We introduce a unified framework that bridges both through iterative bidirectional alignment of their latent representations. At its core, a novel cross-attentive alignment mechanism dynamically synchronizes monocular contextual cues with stereo hypothesis representations during stereo reasoning. This mutual alignment resolves stereo ambiguities (e.g., specular surfaces) by injecting monocular structure priors while refining monocular depth with stereo geometry within a single network. Extensive experiments demonstrate state-of-the-art results: **it reduces zero-shot generalization error by `>40%` on Middlebury and ETH3D**, while addressing longstanding failures on transparent and reflective surfaces. By harmonizing multi-view geometry with monocular context, our approach enables robust 3D perception that transcends modality-specific limitations.
 
 ![Example of reconstructions](assets/overview.png)
@@ -27,7 +46,7 @@ cd BridgeDepth
 conda create -n bridgedepth python=3.10
 conda activate bridgedepth
 pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu126  # use the correct version of cuda for your system
-pip install -r requirement.txt
+pip install -r requirements.txt
 ```
 
 ### Checkpoints
