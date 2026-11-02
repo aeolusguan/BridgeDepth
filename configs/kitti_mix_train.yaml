@@ -9,7 +9,7 @@ SOLVER:
 DATASETS:
   TRAIN: ("kitti_mix",)
   CROP_SIZE: [304, 1152]
-  TEST: ("kitti_2015_val",)
+  TEST: ("kitti_2015_trainval",)
 TEST:
   EVAL_PERIOD: 500
   EVAL_MAX_DISP: [null]

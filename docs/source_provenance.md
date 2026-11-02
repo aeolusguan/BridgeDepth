@@ -14,6 +14,8 @@ Shared changes:
 - CrossAttention context padding scales with its context/query stride; meshgrid indexing is explicit. This fixes padded half-resolution and double-resolution windows.
 - `drop_path` checks `drop_prob` rather than the function name. Image inference and the default zero-dropout configuration retain their behavior.
 
+The KITTI image loader follows [DispViT's directory-based KITTI implementation](https://github.com/aeolusguan/DispViT/blob/main/training/data/datasets.py#L253-L275). It uses year identifiers, sorted directory discovery and optional non-occluded labels. The configuration builders retain the trainval/mixed names; mixed training concatenates the two years. Text split lists and the custom 40-image validation subset have been removed; KITTI fine-tuning evaluation uses the full labeled 2015 set.
+
 ## FILT3R and CroCo
 
 The bundled architecture and frozen wrapper are unchanged by this integration. FILT3R is pinned to commit `6cf6d28b6ec7fbcc985187a0f099ccbc90224392`. Its provenance and earlier local adaptations are documented in [the bundled README](../bridgedepth/models/_filt3r/README.md). The [FILT3R license](../bridgedepth/models/_filt3r/LICENSE), [CroCo license](../bridgedepth/models/_filt3r/croco/LICENSE) and [CroCo notice](../bridgedepth/models/_filt3r/croco/NOTICE) remain included in the package.

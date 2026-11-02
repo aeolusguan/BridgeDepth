@@ -50,13 +50,6 @@ def verify_str_arg(
     return value
 
 
-# read all lines in a file
-def read_all_lines(filename):
-    with open(filename) as fp:
-        lines = [line.rstrip() for line in fp.readlines()]
-    return lines
-
-
 class StereoDataset(EasyDataset):
     def __init__(self, aug_params=None, sparse=False, reader=None):
         self.augmentor = None
@@ -252,58 +245,32 @@ class ETH3D(StereoDataset):
             
             
 class KITTI(StereoDataset):
-    def __init__(self, aug_params=None, root='datasets/KITTI', split='training', image_set='kitti_mix'):
+    def __init__(self, aug_params=None, root='datasets/KITTI', split='training', image_set='2015', nonocc=False):
         super(KITTI, self).__init__(aug_params, sparse=True, reader=frame_utils.readDispKITTI)
         assert os.path.exists(root)
+        occ_str = 'noc' if nonocc else 'occ'
+        if image_set == '2012':
+            root = osp.join(root, 'KITTI_2012')
+            disp_prefix = osp.join(root, 'training', f'disp_{occ_str}')
+            images1 = sorted(glob(osp.join(root, split, 'colored_0/*_10.png')))
+            images2 = sorted(glob(osp.join(root, split, 'colored_1/*_10.png')))
+        elif image_set == '2015':
+            root = osp.join(root, 'KITTI_2015')
+            disp_prefix = osp.join(root, 'training', f'disp_{occ_str}_0')
+            images1 = sorted(glob(osp.join(root, split, 'image_2/*_10.png')))
+            images2 = sorted(glob(osp.join(root, split, 'image_3/*_10.png')))
+        else:
+            raise ValueError("Unknown KITTI image set: '{}'".format(image_set))
+
+        for img1, img2 in zip(images1, images2):
+            self.image_list += [[img1, img2]]
 
         if split == 'testing':
             self.is_test = True
-            if image_set == 'kitti_2012':
-                root = osp.join(root, 'KITTI_2012')
-                images1 = sorted(glob(osp.join(root, 'testing', 'colored_0/*_10.png')))
-                images2 = sorted(glob(osp.join(root, 'testing', 'colored_1/*_10.png')))
-            elif image_set == 'kitti_2015':
-                root = osp.join(root, 'KITTI_2015')
-                images1 = sorted(glob(osp.join(root, 'testing', 'image_2/*_10.png')))
-                images2 = sorted(glob(osp.join(root, 'testing', 'image_3/*_10.png')))
-            else:
-                raise ValueError("Unknown dataset for test: '{}'".format(image_set))
-            for img1, img2 in zip(images1, images2):
-                self.image_list += [ [img1, img2] ]
-
         else:
-            kitti_dict = {
-                'kitti_2015_val': 'KITTI_2015_val.txt',
-                'kitti_mix': 'KITTI_mix.txt',
-                'kitti_2015_trainval': 'KITTI_2015_trainval.txt',
-                'kitti_2012_trainval': 'KITTI_2012_trainval.txt',
-            }
+            self.disparity_list = sorted(glob(osp.join(disp_prefix, '*_10.png')))
 
-            assert image_set in kitti_dict.keys()
-            data_filename = Path(__file__).parent / 'splits' / kitti_dict[image_set]
 
-            self._root_12 = os.path.join(root, 'KITTI_2012')
-            self._root_15 = os.path.join(root, 'KITTI_2015')
-
-            self.load_path(data_filename)
-
-    def load_path(self, list_filename):
-        lines = read_all_lines(list_filename)
-        splits = [line.split() for line in lines]
-        for line in splits:
-            left_name = line[0].split('/')[1]
-            if left_name.startswith('image'):
-                root = self._root_15
-            else:
-                root = self._root_12
-            img1 = os.path.join(root, line[0])
-            img2 = os.path.join(root, line[1])
-            self.image_list += [ [img1, img2] ]
-            if len(line) > 2:
-                disp = os.path.join(root, line[2])
-                self.disparity_list += [ disp ]
-            
-            
 class Middlebury(StereoDataset):
     def __init__(self, aug_params=None, root='datasets/Middlebury', split='F', image_set='training'):
         super(Middlebury, self).__init__(aug_params, sparse=True, reader=frame_utils.readDispMiddlebury)
@@ -526,8 +493,11 @@ def build_train_loader(cfg):
         elif dataset_name == 'eth3d':
             new_dataset = ETH3D(aug_params, split='training')
             logger.info(f"{len(new_dataset)} samples from ETH3D")
-        elif 'kitti_' in dataset_name:
-            new_dataset = KITTI(aug_params, image_set=dataset_name)
+        elif dataset_name == 'kitti_mix':
+            new_dataset = KITTI(aug_params, image_set='2015') + KITTI(aug_params, image_set='2012')
+            logger.info(f"{len(new_dataset)} samples from KITTI")
+        elif dataset_name in ('kitti_2012_trainval', 'kitti_2015_trainval'):
+            new_dataset = KITTI(aug_params, image_set=dataset_name.split('_')[1])
             logger.info(f"{len(new_dataset)} samples from KITTI")
         elif dataset_name == 'sintel_stereo':
             new_dataset = SintelStereo(aug_params)
@@ -590,9 +560,9 @@ def build_val_loader(cfg, dataset_name):
     if dataset_name == 'things':
         val_dataset = SceneFlowDatasets(dstype='frames_finalpass', things_test=True)
         logger.info('Number of validation image pairs: %d' % len(val_dataset))
-    elif 'kitti' in dataset_name:
-        # perform validation using the KITTI (train) split
-        val_dataset = KITTI(image_set=dataset_name)
+    elif dataset_name in ('kitti_2012_trainval', 'kitti_2015_trainval'):
+        # Evaluate all labeled training images, as in DispViT.
+        val_dataset = KITTI(image_set=dataset_name.split('_')[1])
         logger.info('Number of validation image pairs: %d' % len(val_dataset))
     elif dataset_name == 'eth3d':
         val_dataset = ETH3D(split='training')
@@ -600,6 +570,8 @@ def build_val_loader(cfg, dataset_name):
     elif dataset_name.startswith("middlebury_"):
         val_dataset = Middlebury(split=dataset_name.replace('middlebury_', ''))
         logger.info('Number of validation image pairs: %d' % len(val_dataset))
+    else:
+        raise ValueError(f"Unrecognized dataset {dataset_name}")
 
     world_size = comm.get_world_size()
     if world_size > 1:

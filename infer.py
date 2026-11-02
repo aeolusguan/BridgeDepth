@@ -102,7 +102,7 @@ def run_on_dataset(dataset, model, output, find_output_path=None, show_attr="dis
 def create_kitti_submission(model, image_set, output):
     training_mode = model.training
     model.eval()
-    test_dataset = datasets.KITTI(split='testing', image_set=image_set)
+    test_dataset = datasets.KITTI(split='testing', image_set=image_set.split('_')[1])
     
     total_compute_time = 0.0
 
