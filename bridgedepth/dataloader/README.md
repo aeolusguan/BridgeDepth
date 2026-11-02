@@ -1,6 +1,6 @@
 The KITTI image-model loader uses [DispViT's directory-based implementation](https://github.com/aeolusguan/DispViT/blob/main/training/data/datasets.py#L253-L275), with `image_set='2012'` or `'2015'`. It discovers sorted `*_10.png` stereo images and disparities directly, without text files or a custom validation subset. `nonocc=True` selects non-occluded disparity labels; the default uses occluded labels.
 
-Config dataset names remain `kitti_2012_trainval` (194 pairs in the full release), `kitti_2015_trainval` (200), and `kitti_mix` (394). The training loader builds `kitti_mix` by concatenating 2015 followed by 2012. Evaluation uses all labeled images of the selected year; the KITTI fine-tuning config evaluates on all 200 KITTI 2015 images. Directory discovery sorts samples rather than preserving the old text-file ordering.
+Config dataset names remain `kitti_2012_trainval` (194 pairs in the full release), `kitti_2015_trainval` (200), and `kitti_mix` (394). The training loader builds `kitti_mix` by concatenating 2015 followed by 2012. The KITTI fine-tuning config has no evaluation datasets and disables periodic evaluation. Directory discovery sorts samples rather than preserving the old text-file ordering.
 
 Official test images use `split='testing'` with the same year identifiers and require no disparity files. The existing submission commands continue to accept `kitti_2012` and `kitti_2015`. Streaming datasets continue to use `bridgedepth/datasets/`.
 

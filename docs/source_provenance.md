@@ -14,7 +14,7 @@ Shared changes:
 - CrossAttention context padding scales with its context/query stride; meshgrid indexing is explicit. This fixes padded half-resolution and double-resolution windows.
 - `drop_path` checks `drop_prob` rather than the function name. Image inference and the default zero-dropout configuration retain their behavior.
 
-The KITTI image loader follows [DispViT's directory-based KITTI implementation](https://github.com/aeolusguan/DispViT/blob/main/training/data/datasets.py#L253-L275). It uses year identifiers, sorted directory discovery and optional non-occluded labels. The configuration builders retain the trainval/mixed names; mixed training concatenates the two years. Text split lists and the custom 40-image validation subset have been removed; KITTI fine-tuning evaluation uses the full labeled 2015 set.
+The KITTI image loader follows [DispViT's directory-based KITTI implementation](https://github.com/aeolusguan/DispViT/blob/main/training/data/datasets.py#L253-L275). It uses year identifiers, sorted directory discovery and optional non-occluded labels. The configuration builders retain the trainval/mixed names; mixed training concatenates the two years. Text split lists and the custom 40-image validation subset have been removed. The KITTI fine-tuning config has no evaluation datasets and disables periodic evaluation.
 
 ## FILT3R and CroCo
 

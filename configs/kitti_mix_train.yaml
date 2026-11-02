@@ -9,10 +9,9 @@ SOLVER:
 DATASETS:
   TRAIN: ("kitti_mix",)
   CROP_SIZE: [304, 1152]
-  TEST: ("kitti_2015_trainval",)
+  TEST: []
 TEST:
-  EVAL_PERIOD: 500
-  EVAL_MAX_DISP: [null]
+  EVAL_PERIOD: 0
 BACKBONE:
   MODEL_TYPE: "convnext"
   OUT_CHANNELS: 128

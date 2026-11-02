@@ -103,4 +103,5 @@ def test_custom_validation_subset_is_removed(kitti_root):
     root = Path(__file__).resolve().parents[1]
     cfg = get_cfg()
     cfg.merge_from_file(str(root / "configs/kitti_mix_train.yaml"))
-    assert list(cfg.DATASETS.TEST) == ["kitti_2015_trainval"]
+    assert list(cfg.DATASETS.TEST) == []
+    assert cfg.TEST.EVAL_PERIOD == 0
