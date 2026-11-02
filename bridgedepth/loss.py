@@ -4,51 +4,39 @@ from torch import nn
 from .stereo import build_criterion as build_stereo_criterion
 
 
-def invalid_to_nans(arr, valid_mask):
-    if valid_mask is not None:
-        arr = arr.clone()
-        arr[~valid_mask] = float('nan')
-    return arr
+@torch.no_grad()
+def normalize_gt_disparity(disp, mask):
+    """Divide each GT disparity map by its valid-pixel mean; invalid pixels are zero.
 
-#@torch.no_grad()
-def compute_scale_and_shift(input, mask):
+    ``disp`` and ``mask`` have shape [B,H,W]. Statistics use float32, and an
+    image without valid pixels produces an all-zero target.
     """
-    input, mask: [B,H,W]
-    Returns:
-        bias, scale: [B]
-    """
-    nan_input = invalid_to_nans(input, mask).flatten(1)
-    bias = torch.nanquantile(nan_input, 0.5, dim=1)
-    scale = torch.abs(nan_input - bias[:, None]).nanmean(dim=1) + 1e-6
-    bias[bias.isnan()] = 0
-    scale[scale.isnan()] = 1
-    return bias, scale
+    valid_disp = torch.where(mask, disp.float(), 0.0)
+    count = mask.sum(dim=(-2, -1), keepdim=True).clamp_min(1)
+    mean = valid_disp.sum(dim=(-2, -1), keepdim=True) / count
+    return valid_disp / mean.clamp_min(1e-6)
 
-def normalize_disparity(disp, mask):
-    """
-    disp, mask: [B,H,W]
-    """
-    bias, scale = compute_scale_and_shift(disp, mask)
-    return (disp - bias[:, None, None]) / scale[:, None, None]
 
-def sequence_affine_invariant_loss(predictions, target, mask, loss_gamma=0.9):
+def sequence_gt_normalized_loss(predictions, target, mask, loss_gamma=0.9):
     """
-    predictions: [N,B,H,W]
-    target:      [B,H,W]
-    mask:        [B,H,W]
+    Masked L1 between raw monocular predictions and mean-normalized GT.
+
+    predictions: [N,B,H,W], where N counts refinement stages of one stereo pair
+    target:      [B,H,W], GT disparity in pixels
+    mask:        [B,H,W], shared by normalization and supervision
     """
     n_predictions = predictions.shape[0]
     
-    # We adjust the loss_gamma so it is consistent for any number of recurrent iterations
-    adjust_loss_gamma = loss_gamma**(10/(n_predictions-1))
+    # Preserve the existing weighting across refinement stages.
+    adjust_loss_gamma = loss_gamma**(10/(n_predictions-1)) if n_predictions > 1 else 1.0
     loss = 0.0
-    target = normalize_disparity(target, mask)
+    target = normalize_gt_disparity(target, mask)
+    valid_count = mask.flatten(1).sum(dim=1).clamp_min(1)
     
     for i in range(n_predictions):
         i_weight = adjust_loss_gamma**(n_predictions - i - 1)
-        i_pred = normalize_disparity(predictions[i], mask)
-        i_loss = torch.nan_to_num((i_pred - target).abs(), posinf=0) * mask
-        i_loss = i_loss.flatten(1).sum(dim=1) / (mask.flatten(1).sum(dim=1) + 1e-6)
+        i_loss = torch.where(mask, (predictions[i] - target).abs(), 0.0)
+        i_loss = i_loss.flatten(1).sum(dim=1) / valid_count
         loss += i_weight * i_loss.mean()
     
     assert not torch.isnan(loss)
@@ -72,7 +60,7 @@ class BridgeCriterion(nn.Module):
         tgt_disp = targets['disp'].to(device)
         valid = targets['valid'].to(device)
         valid = valid & (tgt_disp < self.stereo_criterion.max_disp)
-        loss_recurrent = sequence_affine_invariant_loss(state_predictions, tgt_disp, valid, self.loss_gamma)
+        loss_recurrent = sequence_gt_normalized_loss(state_predictions, tgt_disp, valid, self.loss_gamma)
         
         loss_dict.update({'loss_recurrent': loss_recurrent})
         return loss_dict

@@ -1,7 +1,0 @@
-# Refactor regression fixture
-
-`streaming_before_integration.pt` was captured from the working streaming implementation before repository integration, using PyTorch 2.6.0 on CPU with one thread. It contains random stereo inputs, all evaluation outputs and recurrent-state fields for three frames, first-frame training outputs, and the original parameter/buffer names and shapes.
-
-The small DPT model configuration is defined by `make_bridge` in `test_bridge.py` (model seed 19). Seed 317 initializes every stereo-to-FILT3R return projection with nonzero weights and biases before generating the inputs. The fixture contains no pretrained weights or accuracy results. The test independently reconstructs the seeded model and compares its outputs with these saved pre-refactor values.
-
-`image_before_integration.pt` was captured from the unmodified image implementation at BridgeDepth commit `9a231601e6981d3536fa6a78ebaccebc1edb99a4`, with PyTorch 2.6.0 on CPU and one thread. It uses the real randomly initialized DINOv2 ViT-S/DPT monocular model and CNN stereo model, with two coarse and two fine alignment layers. Its configuration and seeds are reproduced in `test_image_compatibility.py`. Training and evaluation outputs use upstream inference precision settings. The image dimensions avoid the upstream padded cross-resolution bug, which is tested separately with the corrected attention implementation.
